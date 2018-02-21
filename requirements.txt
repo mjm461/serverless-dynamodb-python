@@ -1,0 +1,4 @@
+#psycopg2==2.7.3.2
+#SQLAlchemy==1.2.2
+pynamodb==3.2.1
+#boto3==1.5.32

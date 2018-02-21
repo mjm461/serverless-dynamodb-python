@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: AWS API gateway example in Python
+Resources:
+  SampleHandlerApi:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: game_api.handler
+      Events:
+        ListGames:
+          Type: Api
+          Properties:
+            Path: /game
+            Method: get
+        CreateGame:
+          Type: Api
+          Properties:
+            Path: /game
+            Method: post
+        DelPutUpdateGame:
+          Type: Api
+          Properties:
+            Path: /game/{player}
+            Method: any
+
+      Environment:
+        Variables:
+          LOGGING_LEVEL: DEBUG
+          CONFIG_PATHS:
+          ENV: dev
+          AWS_DYNAMODB_ENDPOINT: http://1.2.3.4:8000
+          AWS_REGION: us-east
+
+      Runtime: python3.6
+      Timeout: 100
+      CodeUri: bundle.zip
+      MemorySize: 128
