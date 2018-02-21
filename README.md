@@ -2,21 +2,18 @@
 
 ## Development 
 
-### Prerequisites
+## Prerequisites
 
 - Install [Docker](https://github.com/awslabs/aws-sam-local#prerequisites)
 - Install [AWS SAM local](https://github.com/awslabs/aws-sam-local) from 
   [here](https://github.com/awslabs/aws-sam-local/releases)
 
 ## To test:
-
 ```bash
 echo '{ "resources": ["arn:aws:events:eu-west-1:482174156240:rule/10MinuteTickRule"] }' | sam local invoke SampleHandlerApi
 ```
 
-
 ### Build
-
 For deployment we follow [the SAM documentation](https://github.com/awslabs/aws-sam-local#package-and-deploy-to-lambda)
 
 To build the bundle.zip for lambda use the  `make bundle` target
@@ -26,13 +23,11 @@ make bundle
 ```
 
 ### Run with SAM local and environment variables
-
 ```bash
 sam local start-api -n env.json
 ```
 
 ### Curl commaands
-
 ```bash
 # Create a new game
 curl localhost:3000/game -X POST -d '{"player_id": "mark", "winner_id": "mark", "loser_id": "bob"}'

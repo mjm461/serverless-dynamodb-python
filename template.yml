@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: AWS API gateway example in Python
 Resources:
-  SampleHandlerApi:
+  GameHandlerApi:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: game_api.handler
