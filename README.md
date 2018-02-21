@@ -8,11 +8,6 @@
 - Install [AWS SAM local](https://github.com/awslabs/aws-sam-local) from 
   [here](https://github.com/awslabs/aws-sam-local/releases)
 
-## To test:
-```bash
-echo '{ "resources": ["arn:aws:events:eu-west-1:482174156240:rule/10MinuteTickRule"] }' | sam local invoke SampleHandlerApi
-```
-
 ### Build
 For deployment we follow [the SAM documentation](https://github.com/awslabs/aws-sam-local#package-and-deploy-to-lambda)
 
@@ -22,21 +17,78 @@ To build the bundle.zip for lambda use the  `make bundle` target
 make bundle
 ```
 
+### Start an instance of DynamoDB Local
+- Get it [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
+
+```bash
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+```
+
 ### Run with SAM local and environment variables
 ```bash
 sam local start-api -n env.json
 ```
 
-### Curl commaands
+### Curl examples
 ```bash
-# Create a new game
-curl localhost:3000/game -X POST -d '{"player_id": "mark", "winner_id": "mark", "loser_id": "bob"}'
+$ curl localhost:3000/game?create=true
+GameModel Created
 
-# List game for a player
-curl localhost:3000/game/mark
+$ curl localhost:3000/game -X POST -d '{"player_id": "mark", "opponent_id": "dave", "winner_id": "mark"}' | python -m json.tool
+{
+    "player_id": "mark",
+    "created_time": "2018-02-21T20:04:14.309467",
+    "opponent_id": "dave",
+    "winner_id": "mark"
+}
 
-# List all games
-curl localhost:3000/game
+$ curl localhost:3000/game -X POST -d '{"player_id": "mark", "opponent_id": "dave", "winner_id": "dave"}' | python -m json.tool
+{
+    "player_id": "mark",
+    "created_time": "2018-02-21T20:04:28.546698",
+    "opponent_id": "dave",
+    "winner_id": "dave"
+}
+
+$ curl localhost:3000/game -X POST -d '{"player_id": "mark", "opponent_id": "bob", "winner_id": "mark"}' | python -m json.tool
+{
+    "player_id": "mark",
+    "created_time": "2018-02-21T20:04:48.313896",
+    "opponent_id": "bob",
+    "winner_id": "mark"
+}
+
+$ curl localhost:3000/game/mark?opponent_id=dave | python -m json.tool
+[
+    {
+        "winner_id": "mark",
+        "opponent_id": "dave",
+        "player_id": "mark",
+        "created_time": "2018-02-21T20:04:14.309467+00:00"
+    },
+    {
+        "winner_id": "dave",
+        "opponent_id": "dave",
+        "player_id": "mark",
+        "created_time": "2018-02-21T20:04:28.546698+00:00"
+    }
+]
+
+$ curl localhost:3000/game/mark?winner_id=mark | python -m json.tool
+[
+    {
+        "winner_id": "mark",
+        "opponent_id": "dave",
+        "player_id": "mark",
+        "created_time": "2018-02-21T20:04:14.309467+00:00"
+    },
+    {
+        "winner_id": "mark",
+        "opponent_id": "bob",
+        "player_id": "mark",
+        "created_time": "2018-02-21T20:04:48.313896+00:00"
+    }
+]
 ```
 
 

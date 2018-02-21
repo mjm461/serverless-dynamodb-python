@@ -27,17 +27,36 @@ class ApiHandler(LambdaBase):
         }
 
     def list(self, headers, parameters, pathParameters, body):
-        return 200, ApiHandler.jsonstr([game.attribute_values for game in list(GameModel.scan())])
+        if "create" in parameters:
+            ## Quick and dirty way to create the table
+            if not GameModel.exists():
+                GameModel.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+            if not GameModel.exists():
+                GameModel.create_table(wait=True)
+            return 200, "GameModel Created"
+        else:
+            ## This is just an example - don't scan the whole table
+            return 200, ApiHandler.jsonstr([game.attribute_values for game in list(GameModel.scan())])
 
     def find(self, headers, parameters, pathParameters, body):
-        return 200, ApiHandler.jsonstr([game.attribute_values for game in list(GameModel.query(pathParameters["player"]))])
+        range_key_condition = None
+
+        if "opponent_id" in parameters:
+            range_key_condition = GameModel.opponent_id == parameters["opponent_id"]
+        elif "winner_id" in parameters:
+            range_key_condition = GameModel.winner_id == parameters["winner_id"]
+
+        return 200, ApiHandler.jsonstr([game.attribute_values for game in list(
+            GameModel.query(pathParameters["player"], range_key_condition=range_key_condition))])
 
     def create(self, headers, parameters, pathParameters, body):
         payload = json.loads(body)
 
         item = GameModel(payload["player_id"], datetime.datetime.utcnow())
+        item.opponent_id = payload["opponent_id"]
         item.winner_id = payload["winner_id"]
-        item.loser_id = payload["loser_id"]
+        if "notes" in payload:
+            item.notes = payload["notes"]
         item.save()
 
         return 200, ApiHandler.jsonstr(item.attribute_values)

@@ -21,9 +21,11 @@ class TestGameModel(unittest.TestCase):
 
         # Create an item
         item = GameModel('1234', datetime.datetime.utcnow())
+        item.opponent_id = winner_uuid
         item.winner_id = winner_uuid
+        item.notes = 'some notes here'
         item.save()
 
         # Count on an index
         self.assertTrue(len(list(
-            GameModel.player_opponent_index.query('1234', GameModel.winner_id == winner_uuid))) == 1)
+            GameModel.player_opponent_index.query('1234', GameModel.opponent_id == winner_uuid))) == 1)

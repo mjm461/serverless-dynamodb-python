@@ -13,14 +13,14 @@ class GamePlayerOpponentIndex(LocalSecondaryIndex):
         projection = AllProjection()
 
     player_id = UnicodeAttribute(hash_key=True)
-    winner_id = UnicodeAttribute(range_key=True)
+    opponent_id = UnicodeAttribute(range_key=True)
 
 
-class GameOpponentTimeIndex(GlobalSecondaryIndex):
+class GameWinnerTimeIndex(GlobalSecondaryIndex):
     class Meta(BaseMeta):
         read_capacity_units = 1
         write_capacity_units = 1
-        table_name = "GameOpponentTimeIndex"
+        table_name = "GameWinnerTimeIndex"
         projection = AllProjection()
 
     winner_id = UnicodeAttribute(hash_key=True)
@@ -35,8 +35,9 @@ class GameModel(Model):
 
     player_id = UnicodeAttribute(hash_key=True)
     created_time = UTCDateTimeAttribute(range_key=True)
+    opponent_id = UnicodeAttribute()
     winner_id = UnicodeAttribute()
-    loser_id = UnicodeAttribute(null=True)
+    notes = UnicodeAttribute(null=True)
 
     player_opponent_index = GamePlayerOpponentIndex()
-    opponent_time_index = GameOpponentTimeIndex()
+    winner_time_index = GameWinnerTimeIndex()
