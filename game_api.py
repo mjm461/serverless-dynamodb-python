@@ -3,11 +3,13 @@ from game import singleton
 from game.model import GameModel
 import json
 import datetime
+import os
 
-#import sys
-#sys.path.append("pycharm-debug-py3k.egg")
-#import pydevd
-#pydevd.settrace('1.2.3.4', port=5858, stdoutToServer=True, stderrToServer=True, suspend=True)
+if 'DEBUG' in os.environ:
+    import sys
+    sys.path.append("pycharm-debug-py3k.egg")
+    import pydevd
+    pydevd.settrace(os.environ['DEBUG'], port=5858, stdoutToServer=True, stderrToServer=True, suspend=True)
 
 
 @singleton
@@ -39,15 +41,21 @@ class ApiHandler(LambdaBase):
             return 200, ApiHandler.jsonstr([game.attribute_values for game in list(GameModel.scan())])
 
     def find(self, headers, parameters, pathParameters, body):
-        range_key_condition = None
 
-        if "opponent_id" in parameters:
-            range_key_condition = GameModel.opponent_id == parameters["opponent_id"]
-        elif "winner_id" in parameters:
-            range_key_condition = GameModel.winner_id == parameters["winner_id"]
+        opponent_id = parameters.get("opponent_id", None)
+        winner = parameters.get("winner", None)
 
-        return 200, ApiHandler.jsonstr([game.attribute_values for game in list(
-            GameModel.query(pathParameters["player"], range_key_condition=range_key_condition))])
+        if opponent_id:
+            ## Use LSI to find the times you played an opponent
+            results = GameModel.player_opponent_index.query(pathParameters["player"], GameModel.opponent_id == opponent_id)
+        elif winner:
+            ## Use GSI to order your wins by time
+            results = GameModel.winner_time_index.query(pathParameters["player"])
+        else:
+            ## Get your wins/losses
+            results = GameModel.query(pathParameters["player"])
+
+        return 200, ApiHandler.jsonstr([game.attribute_values for game in list(results)])
 
     def create(self, headers, parameters, pathParameters, body):
         payload = json.loads(body)

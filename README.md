@@ -74,7 +74,7 @@ $ curl localhost:3000/game/mark?opponent_id=dave | python -m json.tool
     }
 ]
 
-$ curl localhost:3000/game/mark?winner_id=mark | python -m json.tool
+$ curl http://localhost:3000/game/mark?winner=true | python -m json.tool
 [
     {
         "winner_id": "mark",
